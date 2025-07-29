@@ -1,0 +1,60 @@
+-- 1. TABLE USERS (Tambahkan kolom 'address' dan 'phone')
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('user', 'admin') DEFAULT 'user',
+    address TEXT,                      -- Alamat pengiriman
+    phone VARCHAR(20),                 -- Nomor telepon
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 2. TABLE PRODUCTS (Tambahkan 'category' dan 'discount')
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    stock INT NOT NULL,
+    description TEXT,
+    image VARCHAR(255),                -- Path gambar
+    category VARCHAR(50),              -- Kategori: Skincare, Makeup, dll
+    discount DECIMAL(5,2) DEFAULT 0,   -- Diskon dalam persen (0-100)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 3. TABLE ORDERS (Tambahkan 'payment_method' dan 'shipping_address')
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    status ENUM('pending', 'paid', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    payment_method ENUM('transfer', 'cod', 'e-wallet'), -- Metode pembayaran
+    shipping_address TEXT,             -- Alamat pengiriman (copy dari user)
+    tracking_number VARCHAR(50),       -- Nomor resi pengiriman
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 4. TABLE ORDER_ITEMS (Tambahkan 'discount_applied')
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    qty INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,     -- Harga saat checkout
+    discount_applied DECIMAL(5,2) DEFAULT 0, -- Diskon yang diberikan
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+-- 5. TABLE PASSWORD_RESETS (Untuk fitur lupa password)
+CREATE TABLE password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
